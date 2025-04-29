@@ -67,6 +67,7 @@ func (a *authUsecase) Login(email, password string) (*entity.TokenPair, error) {
 	}, nil
 }
 
+// utils
 func (a *authUsecase) generateJWT(user entity.User) (string, time.Time, error) {
 	expiresAt := time.Now().Add(a.accessExpire)
 

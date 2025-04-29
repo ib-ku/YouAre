@@ -9,6 +9,7 @@ package userpb
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -281,11 +282,55 @@ func (x *LoginResponse) GetUser() *UserResponse {
 	return nil
 }
 
+type UserListResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Users         []*UserResponse        `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserListResponse) Reset() {
+	*x = UserListResponse{}
+	mi := &file_proto_user_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserListResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserListResponse) ProtoMessage() {}
+
+func (x *UserListResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_user_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserListResponse.ProtoReflect.Descriptor instead.
+func (*UserListResponse) Descriptor() ([]byte, []int) {
+	return file_proto_user_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UserListResponse) GetUsers() []*UserResponse {
+	if x != nil {
+		return x.Users
+	}
+	return nil
+}
+
 var File_proto_user_proto protoreflect.FileDescriptor
 
 const file_proto_user_proto_rawDesc = "" +
 	"\n" +
-	"\x10proto/user.proto\x12\x04user\"C\n" +
+	"\x10proto/user.proto\x12\x04user\x1a\x1bgoogle/protobuf/empty.proto\"C\n" +
 	"\x0fRegisterRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"@\n" +
@@ -300,12 +345,17 @@ const file_proto_user_proto_rawDesc = "" +
 	"\rLoginResponse\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x12&\n" +
-	"\x04user\x18\x03 \x01(\v2\x12.user.UserResponseR\x04user2\xae\x01\n" +
+	"\x04user\x18\x03 \x01(\v2\x12.user.UserResponseR\x04user\"<\n" +
+	"\x10UserListResponse\x12(\n" +
+	"\x05users\x18\x01 \x03(\v2\x12.user.UserResponseR\x05users2\xac\x02\n" +
 	"\vUserService\x125\n" +
 	"\bRegister\x12\x15.user.RegisterRequest\x1a\x12.user.UserResponse\x120\n" +
 	"\x05Login\x12\x12.user.LoginRequest\x1a\x13.user.LoginResponse\x126\n" +
 	"\n" +
-	"GetProfile\x12\x14.user.ProfileRequest\x1a\x12.user.UserResponseB\x17Z\x15proto/gen/user;userpbb\x06proto3"
+	"GetProfile\x12\x14.user.ProfileRequest\x1a\x12.user.UserResponse\x12@\n" +
+	"\x0eGetAllProfiles\x12\x16.google.protobuf.Empty\x1a\x16.user.UserListResponse\x12:\n" +
+	"\n" +
+	"DeleteUser\x12\x14.user.ProfileRequest\x1a\x16.google.protobuf.EmptyB\"Z user-service/pkg/gen/user;userpbb\x06proto3"
 
 var (
 	file_proto_user_proto_rawDescOnce sync.Once
@@ -319,27 +369,34 @@ func file_proto_user_proto_rawDescGZIP() []byte {
 	return file_proto_user_proto_rawDescData
 }
 
-var file_proto_user_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_proto_user_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_proto_user_proto_goTypes = []any{
-	(*RegisterRequest)(nil), // 0: user.RegisterRequest
-	(*LoginRequest)(nil),    // 1: user.LoginRequest
-	(*ProfileRequest)(nil),  // 2: user.ProfileRequest
-	(*UserResponse)(nil),    // 3: user.UserResponse
-	(*LoginResponse)(nil),   // 4: user.LoginResponse
+	(*RegisterRequest)(nil),  // 0: user.RegisterRequest
+	(*LoginRequest)(nil),     // 1: user.LoginRequest
+	(*ProfileRequest)(nil),   // 2: user.ProfileRequest
+	(*UserResponse)(nil),     // 3: user.UserResponse
+	(*LoginResponse)(nil),    // 4: user.LoginResponse
+	(*UserListResponse)(nil), // 5: user.UserListResponse
+	(*emptypb.Empty)(nil),    // 6: google.protobuf.Empty
 }
 var file_proto_user_proto_depIdxs = []int32{
 	3, // 0: user.LoginResponse.user:type_name -> user.UserResponse
-	0, // 1: user.UserService.Register:input_type -> user.RegisterRequest
-	1, // 2: user.UserService.Login:input_type -> user.LoginRequest
-	2, // 3: user.UserService.GetProfile:input_type -> user.ProfileRequest
-	3, // 4: user.UserService.Register:output_type -> user.UserResponse
-	4, // 5: user.UserService.Login:output_type -> user.LoginResponse
-	3, // 6: user.UserService.GetProfile:output_type -> user.UserResponse
-	4, // [4:7] is the sub-list for method output_type
-	1, // [1:4] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	3, // 1: user.UserListResponse.users:type_name -> user.UserResponse
+	0, // 2: user.UserService.Register:input_type -> user.RegisterRequest
+	1, // 3: user.UserService.Login:input_type -> user.LoginRequest
+	2, // 4: user.UserService.GetProfile:input_type -> user.ProfileRequest
+	6, // 5: user.UserService.GetAllProfiles:input_type -> google.protobuf.Empty
+	2, // 6: user.UserService.DeleteUser:input_type -> user.ProfileRequest
+	3, // 7: user.UserService.Register:output_type -> user.UserResponse
+	4, // 8: user.UserService.Login:output_type -> user.LoginResponse
+	3, // 9: user.UserService.GetProfile:output_type -> user.UserResponse
+	5, // 10: user.UserService.GetAllProfiles:output_type -> user.UserListResponse
+	6, // 11: user.UserService.DeleteUser:output_type -> google.protobuf.Empty
+	7, // [7:12] is the sub-list for method output_type
+	2, // [2:7] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_proto_user_proto_init() }
@@ -353,7 +410,7 @@ func file_proto_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_user_proto_rawDesc), len(file_proto_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

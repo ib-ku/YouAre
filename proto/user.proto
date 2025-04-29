@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package user;
 
-option go_package = "proto/gen/user;userpb";
+option go_package = "user-service/pkg/gen/user;userpb";
 
 import "google/protobuf/empty.proto";
 
@@ -10,6 +10,7 @@ service UserService {
     rpc Register (RegisterRequest) returns (UserResponse);
     rpc Login (LoginRequest) returns (LoginResponse);
     rpc GetProfile (ProfileRequest) returns (UserResponse);
+    rpc GetAllProfiles (google.protobuf.Empty) returns (UserListResponse);
     rpc DeleteUser (ProfileRequest) returns (google.protobuf.Empty);
 }
 
@@ -36,4 +37,8 @@ message LoginResponse {
     string access_token = 1;
     string refresh_token = 2;
     UserResponse user = 3;
+}
+
+message UserListResponse {
+    repeated UserResponse users = 1;
 }

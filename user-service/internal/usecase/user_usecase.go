@@ -9,7 +9,7 @@ import (
 type UserUsecase interface {
 	GetUserById(ID string) (*entity.User, error)
 	GetUserByEmail(email string) (*entity.User, error)
-	GetAll() []*entity.User
+	GetAll() ([]*entity.User, error)
 	DeleteUser(ID string) error
 }
 
@@ -48,13 +48,13 @@ func (u *userUsecase) GetUserByEmail(email string) (*entity.User, error) {
 	return user, nil
 }
 
-func (u *userUsecase) GetAll() []*entity.User {
+func (u *userUsecase) GetAll() ([]*entity.User, error) {
 	users, err := u.repo.GetAll()
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return users
+	return users, nil
 }
 
 func (u *userUsecase) DeleteUser(ID string) error {
