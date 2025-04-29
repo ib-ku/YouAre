@@ -1,6 +1,10 @@
 package entity
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"errors"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type User struct {
 	ID       primitive.ObjectID `bson:"_id,omitempty" json:"id"`
@@ -12,3 +16,6 @@ type TokenPair struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token,omitempty"`
 }
+
+var ErrInvalidCredentials = errors.New("invalid credentials")
+var ErrInvalidInput = errors.New("Invalid Input")

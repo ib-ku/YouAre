@@ -4,10 +4,13 @@ package user;
 
 option go_package = "proto/gen/user;userpb";
 
+import "google/protobuf/empty.proto";
+
 service UserService {
     rpc Register (RegisterRequest) returns (UserResponse);
     rpc Login (LoginRequest) returns (LoginResponse);
     rpc GetProfile (ProfileRequest) returns (UserResponse);
+    rpc DeleteUser (ProfileRequest) returns (google.protobuf.Empty);
 }
 
 message RegisterRequest {
