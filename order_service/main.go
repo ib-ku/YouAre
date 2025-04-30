@@ -1,11 +1,11 @@
 package main
 
 import (
+	"YouAre/order_service/infrastructure/database"
+	"YouAre/order_service/infrastructure/rabbitmq"
+	"YouAre/order_service/transport/grpc"
+	"YouAre/order_service/usecase"
 	"log"
-	"YouAre/order-service/infra/db"
-	"YouAre/order-service/infra/rabbitmq"
-	"YouAre/order-service/transport/grpc"
-	"YouAre/order-service/usecase"
 
 	"github.com/streadway/amqp"
 )

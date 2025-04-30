@@ -1,4 +1,4 @@
-module youare
+module YouAre
 
 go 1.23.4
 

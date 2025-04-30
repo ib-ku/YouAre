@@ -1,8 +1,8 @@
 package usecase
 
 import (
-	"YouAre/order-service/domain"
-	"YouAre/order-service/infra/rabbitmq"
+	"YouAre/order_service/domain"
+	"YouAre/order_service/infrastructure/rabbitmq"
 )
 
 type OrderUsecase struct {

@@ -1,7 +1,7 @@
 package db
 
 import (
-	"YouAre/services/order_service/domain"
+	"YouAre/order_service/domain"
 	"fmt"
 )
 
