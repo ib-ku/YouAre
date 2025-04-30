@@ -17,7 +17,6 @@ func NewGRPCServer(orderUsecase *usecase.OrderUsecase) *GRPCServer {
 	return &GRPCServer{orderUsecase: orderUsecase}
 }
 
-// Imagine this is your gRPC handler
 func (s *GRPCServer) CreateOrder(ctx context.Context, productID string, quantity int) error {
 	order := &domain.Order{
 		ID:        uuid.New().String(),

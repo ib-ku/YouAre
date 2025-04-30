@@ -1,11 +1,11 @@
 package domain
 
 type Order struct {
-    ID        string
-    ProductID string
-    Quantity  int
+	ID        string
+	ProductID string
+	Quantity  int
 }
 
 type OrderRepository interface {
-    CreateOrder(order *Order) error
+	CreateOrder(order *Order) error
 }
