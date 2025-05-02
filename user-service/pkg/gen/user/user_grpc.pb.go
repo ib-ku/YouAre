@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.30.2
-// source: proto/user.proto
+// source: user.proto
 
 package userpb
 
@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	UserService_Register_FullMethodName       = "/user.UserService/Register"
 	UserService_Login_FullMethodName          = "/user.UserService/Login"
+	UserService_GetUser_FullMethodName        = "/user.UserService/GetUser"
 	UserService_GetProfile_FullMethodName     = "/user.UserService/GetProfile"
 	UserService_GetAllProfiles_FullMethodName = "/user.UserService/GetAllProfiles"
 	UserService_DeleteUser_FullMethodName     = "/user.UserService/DeleteUser"
@@ -33,6 +34,7 @@ const (
 type UserServiceClient interface {
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	GetProfile(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	GetAllProfiles(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*UserListResponse, error)
 	DeleteUser(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -60,6 +62,16 @@ func (c *userServiceClient) Login(ctx context.Context, in *LoginRequest, opts ..
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(LoginResponse)
 	err := c.cc.Invoke(ctx, UserService_Login_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UserResponse)
+	err := c.cc.Invoke(ctx, UserService_GetUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -102,6 +114,7 @@ func (c *userServiceClient) DeleteUser(ctx context.Context, in *ProfileRequest, 
 type UserServiceServer interface {
 	Register(context.Context, *RegisterRequest) (*UserResponse, error)
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	GetUser(context.Context, *GetUserRequest) (*UserResponse, error)
 	GetProfile(context.Context, *ProfileRequest) (*UserResponse, error)
 	GetAllProfiles(context.Context, *emptypb.Empty) (*UserListResponse, error)
 	DeleteUser(context.Context, *ProfileRequest) (*emptypb.Empty, error)
@@ -120,6 +133,9 @@ func (UnimplementedUserServiceServer) Register(context.Context, *RegisterRequest
 }
 func (UnimplementedUserServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedUserServiceServer) GetUser(context.Context, *GetUserRequest) (*UserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
 func (UnimplementedUserServiceServer) GetProfile(context.Context, *ProfileRequest) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProfile not implemented")
@@ -183,6 +199,24 @@ func _UserService_Login_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).Login(ctx, req.(*LoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetUser(ctx, req.(*GetUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -257,6 +291,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_Login_Handler,
 		},
 		{
+			MethodName: "GetUser",
+			Handler:    _UserService_GetUser_Handler,
+		},
+		{
 			MethodName: "GetProfile",
 			Handler:    _UserService_GetProfile_Handler,
 		},
@@ -270,5 +308,5 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/user.proto",
+	Metadata: "user.proto",
 }

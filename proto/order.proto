@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package order;
+
+option go_package = "order-service/pkg/gen/order;orderpb";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+service OrderService {
+  rpc CreateOrder (CreateOrderRequest) returns (OrderResponse);
+  rpc GetOrder (OrderRequest) returns (OrderResponse);
+  rpc GetAllOrders (google.protobuf.Empty) returns (OrderListResponse);
+  rpc DeleteOrder (OrderRequest) returns (google.protobuf.Empty);
+}
+
+message Order {
+  string id = 1;
+  string user_id = 2;
+  string product_id = 3;
+  int32 quantity = 4;
+  double total_price = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message CreateOrderRequest {
+  string user_id = 1;
+  string product_id = 2;
+  int32 quantity = 3;
+}
+
+message OrderRequest {
+  string id = 1;
+}
+
+message OrderResponse {
+  Order order = 1;
+}
+
+message OrderListResponse {
+  repeated Order orders = 1;
+}

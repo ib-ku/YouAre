@@ -9,10 +9,16 @@ import "google/protobuf/empty.proto";
 service UserService {
     rpc Register (RegisterRequest) returns (UserResponse);
     rpc Login (LoginRequest) returns (LoginResponse);
+    rpc GetUser (GetUserRequest) returns (UserResponse); // <-- add this
     rpc GetProfile (ProfileRequest) returns (UserResponse);
     rpc GetAllProfiles (google.protobuf.Empty) returns (UserListResponse);
     rpc DeleteUser (ProfileRequest) returns (google.protobuf.Empty);
 }
+
+message GetUserRequest {
+    string id = 1;
+}
+
 
 message RegisterRequest {
     string email = 1;

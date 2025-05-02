@@ -7,6 +7,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	google.golang.org/grpc v1.72.0
 	google.golang.org/protobuf v1.36.6
+	order_service v0.0.0-00010101000000-000000000000
 	product-service v0.0.0-00010101000000-000000000000
 	user-service v0.0.0-00010101000000-000000000000
 )
@@ -43,3 +44,5 @@ require (
 replace user-service => ../user-service
 
 replace product-service => ../product-service
+
+replace order_service => ../order_service
