@@ -1,8 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
+	"time"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	ordergrpc "order_service/internal/delivery/grpc"
 	"order_service/internal/repository"
@@ -16,34 +21,37 @@ import (
 )
 
 func main() {
-	// Connect to ProductService
+	// MongoDB setup
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017") // Modify this if MongoDB is not on localhost
+	mongoClient, err := mongo.Connect(ctx, clientOptions)
+	if err != nil {
+		log.Fatalf("failed to connect to MongoDB: %v", err)
+	}
+	defer mongoClient.Disconnect(ctx)
+
+	// Repository and UseCase Setup
+	repo := repository.NewMongoRepo(mongoClient) // Use MongoRepo
 	productConn, err := grpc.Dial("localhost:50052", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to connect to ProductService: %v", err)
 	}
 	defer productConn.Close()
 
-	// Create ProductService client
 	productClient := productpb.NewProductServiceClient(productConn)
-
-	// Initialize repository and use case
-	repo := repository.NewMemoryRepo()
 	uc := usecase.NewOrderUseCase(repo, productClient)
 
-	// Start TCP listener
+	// gRPC Server Setup
 	listener, err := net.Listen("tcp", ":5000")
 	if err != nil {
 		log.Fatalf("failed to listen on port 5000: %v", err)
 	}
 
-	// Create gRPC server
 	server := grpc.NewServer()
-
-	// Register gRPC service handler
-	orderHandler := ordergrpc.NewHandler(uc) // Make sure this exists!
+	orderHandler := ordergrpc.NewHandler(uc)
 	orderpb.RegisterOrderServiceServer(server, orderHandler)
-
-	// Register reflection
 	reflection.Register(server)
 
 	log.Println("OrderService is running on port :5000...")
