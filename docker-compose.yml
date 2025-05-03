@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"    # Для AMQP (используется Go-приложениями)
+      - "15672:15672"  # Для доступа к Web UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  order-service:
+    build:
+      context: ./order-service
+    command: ["./main"]
+    ports:
+      - "50052:50052"  # gRPC порт, откроем если нужен извне
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-network
+
+  product-service:
+    build:
+      context: ./product-service
+    command: ["./main"]
+    ports:
+      - "50053:50052"  # локальный порт : контейнерный порт
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-network
+
+  user-service:
+    build:
+      context: ./user-service
+    command: ["./main"]
+    ports:
+      - "50051:50051"
+    networks:
+      - app-network
+
+  consumer-service:
+    build:
+      context: ./consumer-service
+    command: ["./main"]
+    depends_on:
+      - rabbitmq
+      - order-service
+      - product-service
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

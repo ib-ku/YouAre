@@ -1,18 +1,28 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
 
 	ordergrpc "order_service/internal/delivery/grpc"
+	"order_service/internal/rabbitmq"
 	"order_service/internal/repository"
 	"order_service/internal/usecase"
 	orderpb "order_service/pkg/gen/order"
 	productpb "product-service/pkg/gen/product"
 
+	"github.com/rabbitmq/amqp091-go"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
+)
+
+var (
+	mongoURI = "mongodb://localhost:27017"
+	dbName   = "YouAre"
 )
 
 func main() {
@@ -27,8 +37,17 @@ func main() {
 	productClient := productpb.NewProductServiceClient(productConn)
 
 	// Initialize repository and use case
-	repo := repository.NewMemoryRepo()
-	uc := usecase.NewOrderUseCase(repo, productClient)
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongoURI))
+	if err != nil {
+		log.Fatalf("MongoDB connection error: %v", err)
+	}
+	db := client.Database(dbName)
+
+	repo := repository.NewMongoRepo(db)
+
+	conn, _ := amqp091.Dial("amqp://guest:guest@localhost:5672/")
+	producer, _ := rabbitmq.NewProducer(conn)
+	uc := usecase.NewOrderUseCase(repo, productClient, producer)
 
 	// Start TCP listener
 	listener, err := net.Listen("tcp", ":5000")

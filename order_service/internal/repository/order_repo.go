@@ -1,10 +1,11 @@
 package repository
 
 import (
-	"errors"
+	"context"
 	"order_service/internal/entity"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type OrderRepository interface {
@@ -15,51 +16,88 @@ type OrderRepository interface {
 	DeleteOrder(id string) error
 }
 
-type memoryRepo struct {
-	orders map[string]*entity.Order
+type mongoRepo struct {
+	collection *mongo.Collection
 }
 
-func NewMemoryRepo() OrderRepository {
-	return &memoryRepo{
-		orders: make(map[string]*entity.Order),
+func NewMongoRepo(db *mongo.Database) *mongoRepo {
+	return &mongoRepo{
+		collection: db.Collection("orders"),
 	}
 }
 
-func (r *memoryRepo) CreateOrder(order *entity.Order) (*entity.Order, error) {
+func (r *mongoRepo) CreateOrder(order *entity.Order) (*entity.Order, error) {
 	order.ID = primitive.NewObjectID()
-	r.orders[order.ID.Hex()] = order
-	return order, nil
-}
-
-func (r *memoryRepo) GetOrder(id string) (*entity.Order, error) {
-	order, ok := r.orders[id]
-	if !ok {
-		return nil, errors.New("order not found")
+	_, err := r.collection.InsertOne(context.TODO(), order)
+	if err != nil {
+		return nil, err
 	}
 	return order, nil
 }
 
-func (r *memoryRepo) GetAllOrders() ([]*entity.Order, error) {
-	var result []*entity.Order
-	for _, order := range r.orders {
-		result = append(result, order)
+func (r *mongoRepo) GetOrder(id string) (*entity.Order, error) {
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
 	}
-	return result, nil
+
+	var order entity.Order
+	err = r.collection.FindOne(context.TODO(), primitive.M{"_id": objID}).Decode(&order)
+	if err != nil {
+		return nil, err
+	}
+
+	return &order, nil
 }
 
-func (r *memoryRepo) UpdateOrder(id string, quantity int32) (*entity.Order, error) {
-	order, ok := r.orders[id]
-	if !ok {
-		return nil, errors.New("order not found")
+func (r *mongoRepo) GetAllOrders() ([]*entity.Order, error) {
+	cursor, err := r.collection.Find(context.TODO(), primitive.M{})
+	if err != nil {
+		return nil, err
 	}
-	order.Quantity = int(quantity)
-	return order, nil
+	defer cursor.Close(context.TODO())
+
+	var orders []*entity.Order
+	for cursor.Next(context.TODO()) {
+		var order entity.Order
+		if err := cursor.Decode(&order); err != nil {
+			return nil, err
+		}
+		orders = append(orders, &order)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return orders, nil
 }
 
-func (r *memoryRepo) DeleteOrder(id string) error {
-	if _, ok := r.orders[id]; !ok {
-		return errors.New("order not found")
+func (r *mongoRepo) UpdateOrder(id string, quantity int32) (*entity.Order, error) {
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
 	}
-	delete(r.orders, id)
-	return nil
+
+	update := primitive.M{
+		"$set": primitive.M{"quantity": quantity},
+	}
+
+	_, err = r.collection.UpdateByID(context.TODO(), objID, update)
+	if err != nil {
+		return nil, err
+	}
+
+	// Возвращаем обновлённый заказ
+	return r.GetOrder(id)
+}
+
+func (r *mongoRepo) DeleteOrder(id string) error {
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.collection.DeleteOne(context.TODO(), primitive.M{"_id": objID})
+	return err
 }
