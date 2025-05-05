@@ -22,3 +22,7 @@ func (p *ProductClient) DecreaseStock(productID string, quantity int32) error {
 	})
 	return err
 }
+
+func (p *ProductClient) GetProduct(productID string) (*productpb.ProductResponse, error) {
+	return p.client.Get(context.TODO(), &productpb.ProductRequest{Id: productID})
+}

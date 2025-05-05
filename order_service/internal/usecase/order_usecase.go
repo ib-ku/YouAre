@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"context"
 	"log"
 	"order_service/internal/entity"
 	"order_service/internal/rabbitmq"
@@ -25,15 +24,6 @@ func NewOrderUseCase(repo repository.OrderRepository, productClient productpb.Pr
 }
 
 func (u *OrderUseCase) CreateOrder(order *entity.Order) (*entity.Order, error) {
-	// Получаем информацию о продукте через gRPC
-	resp, err := u.productClient.Get(context.TODO(), &productpb.ProductRequest{
-		Id: order.ProductID,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	order.TotalPrice = float64(order.Quantity) * resp.Product.Price
 	order.CreatedAt = time.Now()
 
 	createdOrder, err := u.repo.CreateOrder(order)
