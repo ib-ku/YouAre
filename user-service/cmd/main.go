@@ -10,6 +10,7 @@ import (
 	usergrpc "user-service/internal/delivery/grpc"
 	"user-service/internal/repository"
 	"user-service/internal/usecase"
+	"user-service/migrations"
 	userpb "user-service/pkg/gen/user"
 
 	"context"
@@ -38,13 +39,21 @@ func main() {
 		log.Fatal("JWT_SECRET is not set in environment")
 	}
 
+	//db connection
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(mongoURI))
 	if err != nil {
 		log.Fatalf("failed to connect to MongoDB: %v", err)
 	}
-
 	db := client.Database(dbName)
+	//migration
+	err = migrations.RunAllMigrations(db)
+	if err != nil {
+		log.Fatal("migration failed: ", err)
+	}
+
 	userRepo := repository.NewUserRepo(db)
+
+	//redis
 	redisCache := cache.NewRedisCache("localhost:6379")
 
 	accessTokenTTL := 15 * time.Minute
