@@ -32,7 +32,7 @@ func main() {
 	productClient := productpb.NewProductServiceClient(productConn)
 
 	// order-service (new connection)
-	orderConn, err := grpc.Dial("localhost:50053", grpc.WithInsecure()) // Assuming order service runs on port 50053
+	orderConn, err := grpc.Dial("localhost:5000", grpc.WithInsecure()) // Assuming order service runs on port 50053
 	if err != nil {
 		log.Fatalf("could not connect to order-service: %v", err)
 	}

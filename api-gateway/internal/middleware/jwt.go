@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte("supersecretkey123")
+var jwtSecret = []byte("lwIUPkVOp8SeIq5ZjTVEDFjJHBw/NQriz1yPo57tPyo=")
 
 func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {

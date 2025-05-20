@@ -89,3 +89,20 @@ func (h *Handler) DeleteOrder(ctx context.Context, req *orderpb.OrderRequest) (*
 	}
 	return &emptypb.Empty{}, nil
 }
+func (h *Handler) UpdateOrder(ctx context.Context, req *orderpb.UpdateOrderRequest) (*orderpb.OrderResponse, error) {
+	updatedOrder, err := h.uc.UpdateOrder(req.Id, req.Quantity)
+	if err != nil {
+		return nil, err
+	}
+
+	return &orderpb.OrderResponse{
+		Order: &orderpb.Order{
+			Id:         updatedOrder.ID.Hex(),
+			UserId:     updatedOrder.UserID,
+			ProductId:  updatedOrder.ProductID,
+			Quantity:   int32(updatedOrder.Quantity),
+			TotalPrice: updatedOrder.TotalPrice,
+			CreatedAt:  timestamppb.New(updatedOrder.CreatedAt),
+		},
+	}, nil
+}

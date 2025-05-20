@@ -12,6 +12,7 @@ service OrderService {
   rpc GetOrder (OrderRequest) returns (OrderResponse);
   rpc GetAllOrders (google.protobuf.Empty) returns (OrderListResponse);
   rpc DeleteOrder (OrderRequest) returns (google.protobuf.Empty);
+  rpc UpdateOrder (UpdateOrderRequest) returns (OrderResponse);
 }
 
 message Order {
@@ -31,6 +32,11 @@ message CreateOrderRequest {
 
 message OrderRequest {
   string id = 1;
+}
+
+message UpdateOrderRequest {
+  string id = 1;
+  int32 quantity = 2;
 }
 
 message OrderResponse {
