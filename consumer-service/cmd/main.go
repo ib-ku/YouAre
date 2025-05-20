@@ -14,34 +14,74 @@ import (
 	consumerGrpc "consumer-service/internal/grpc"
 	"consumer-service/internal/repository"
 	productpb "product-service/pkg/gen/product"
+	userpb "user-service/pkg/gen/user"
 )
 
-var mongoURI = "mongodb://localhost:27017"
-var dbName = "YouAre"
+const (
+	mongoURI    = "mongodb://localhost:27017"
+	dbName      = "YouAre"
+	rabbitMQURL = "amqp://guest:guest@localhost:5672/"
+)
 
 func main() {
-	conn, err := amqp091.Dial("amqp://guest:guest@localhost:5672/")
+	// RabbitMQ connection with retry
+	var conn *amqp091.Connection
+	var err error
+	for i := 0; i < 5; i++ {
+		conn, err = amqp091.Dial(rabbitMQURL)
+		if err == nil {
+			break
+		}
+		log.Printf("RabbitMQ connection attempt %d failed: %v", i+1, err)
+		time.Sleep(2 * time.Second)
+	}
 	if err != nil {
-		log.Fatalf("RabbitMQ connection error: %v", err)
+		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
 	}
 	defer conn.Close()
 
-	grpcConn, err := grpc.Dial("localhost:50052", grpc.WithInsecure())
+	// gRPC connections with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Product Service
+	productConn, err := grpc.DialContext(ctx, "localhost:50052",
+		grpc.WithInsecure(),
+		grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("Failed to connect to product-service: %v", err)
 	}
-	defer grpcConn.Close()
+	defer productConn.Close()
 
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongoURI))
+	// User Service
+	userConn, err := grpc.DialContext(ctx, "localhost:50051",
+		grpc.WithInsecure(),
+		grpc.WithBlock())
+	if err != nil {
+		log.Fatalf("Failed to connect to user-service: %v", err)
+	}
+	defer userConn.Close()
+
+	// MongoDB
+	mongoClient, err := mongo.Connect(context.Background(), options.Client().ApplyURI(mongoURI))
 	if err != nil {
 		log.Fatalf("MongoDB connection error: %v", err)
 	}
-	db := client.Database(dbName)
-	repo := repository.NewMongoRepository(db)
+	defer func() {
+		if err := mongoClient.Disconnect(context.Background()); err != nil {
+			log.Printf("MongoDB disconnect error: %v", err)
+		}
+	}()
 
-	productClient := consumerGrpc.NewProductClient(productpb.NewProductServiceClient(grpcConn))
+	// Initialize services
+	repo := repository.NewMongoRepository(mongoClient.Database(dbName))
+	productClient := consumerGrpc.NewProductClient(productpb.NewProductServiceClient(productConn))
+	userClient := consumerGrpc.NewUserClient(userpb.NewUserServiceClient(userConn))
 
-	consumer := consumer.NewConsumer(conn, productClient, repo)
+	// Start consumer
+	consumer := consumer.NewConsumer(conn, productClient, userClient, repo)
+	log.Println("Consumer service started successfully")
+
 	if err := consumer.StartConsuming(); err != nil {
 		log.Fatalf("Consumer error: %v", err)
 	}
