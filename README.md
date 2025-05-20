@@ -10,36 +10,26 @@ git clone https://github.com/ib-ku/YouAre
 
 # Navigate to the project directory
 cd YouAre
-
-# Install dependencies
-npm install  # or pip install -r requirements.txt, etc.
 ```
 
 ## Usage
 
 ```bash
 # Run the application
-go run main.go
+go run main.go (in each service)
 ```
 
 Open `http://localhost:----` in your browser.
 
 ## Features
 
-- ✅ ---
+- ✅ Email sendler after login
 - ✅ ---
 - ✅ ---
 
 ## API Reference
 
-| Endpoint         | Method | Description              |
-|------------------|--------|--------------------------|
-| `/api/---`     | GET    | ---           |
-| `/api/---` | GET    | ---           |
-| `/api/---`     | POST   | ---       |
-
 ## Screenshots
-
 
 ## Technologies Used
 
