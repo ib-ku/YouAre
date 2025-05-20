@@ -1,9 +1,12 @@
 package usecase
 
 import (
+	"log"
 	"time"
 	"user-service/internal/entity"
 	"user-service/internal/repository"
+
+	gmail "user-service/internal/email"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -44,6 +47,15 @@ func (a *authUsecase) Register(email, password string) (*entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	sender := gmail.NewEmailSender()
+	err = sender.Send(email, "Welcome!", "<h1>Thanks for registration</h1>")
+	if err != nil {
+		log.Fatalf("failed to send welcome email: %v", err)
+	}
+	log.Println("user registrated")
+	log.Println("email sent")
+
 	return newUser, nil
 }
 

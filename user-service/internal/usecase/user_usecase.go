@@ -1,6 +1,10 @@
 package usecase
 
 import (
+	"encoding/json"
+	"fmt"
+	"time"
+	"user-service/internal/cache"
 	"user-service/internal/entity"
 	"user-service/internal/repository"
 )
@@ -14,12 +18,14 @@ type UserUsecase interface {
 }
 
 type userUsecase struct {
-	repo repository.UserRepository
+	repo  repository.UserRepository
+	cache *cache.RedisCache
 }
 
-func NewUserUsecase(repo repository.UserRepository) *userUsecase {
+func NewUserUsecase(repo repository.UserRepository, c *cache.RedisCache) *userUsecase {
 	return &userUsecase{
-		repo: repo,
+		repo:  repo,
+		cache: c,
 	}
 }
 
@@ -28,9 +34,27 @@ func (u *userUsecase) GetUserById(ID string) (*entity.User, error) {
 	if ID == "" {
 		return nil, entity.ErrInvalidInput
 	}
+
+	cacheKey := "user:" + ID
+
+	cached, err := u.cache.Get(cacheKey)
+	if err == nil {
+		fmt.Println("CACHE HIT for", cacheKey)
+		var user entity.User
+		if err := json.Unmarshal([]byte(cached), &user); err == nil {
+			return &user, nil
+		}
+	}
+
+	fmt.Println("CACHE MISS for", cacheKey)
 	user, err := u.repo.GetUserById(ID)
 	if err != nil {
 		return nil, err
+	}
+
+	userBytes, err := json.Marshal(user)
+	if err == nil {
+		u.cache.Set(cacheKey, string(userBytes), 10*time.Minute)
 	}
 
 	return user, nil
@@ -61,9 +85,12 @@ func (u *userUsecase) DeleteUser(ID string) error {
 	if ID == "" {
 		return entity.ErrInvalidInput
 	}
+
 	_, err := u.repo.GetUserById(ID)
 	if err != nil {
 		return err
 	}
+
+	u.cache.Delete("user:" + ID)
 	return u.repo.Delete(ID)
 }

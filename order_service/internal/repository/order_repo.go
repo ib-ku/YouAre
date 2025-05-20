@@ -88,6 +88,7 @@ func (r *mongoRepo) UpdateOrder(id string, quantity int32) (*entity.Order, error
 		return nil, err
 	}
 
+	// Возвращаем обновлённый заказ
 	return r.GetOrder(id)
 }
 
