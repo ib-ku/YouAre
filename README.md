@@ -29,7 +29,14 @@ Open `http://localhost:----` in your browser.
 
 ## API Reference
 
+| Endpoint         | Method | Description              |
+|------------------|--------|--------------------------|
+| `/api/---`     | GET    | ---           |
+| `/api/---` | GET    | ---           |
+| `/api/---`     | POST   | ---       |
+
 ## Screenshots
+
 
 ## Technologies Used
 
