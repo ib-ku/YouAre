@@ -45,8 +45,17 @@ func main() {
 
 	repo := repository.NewMongoRepo(db)
 
-	conn, _ := amqp091.Dial("amqp://guest:guest@localhost:5672/")
-	producer, _ := rabbitmq.NewProducer(conn)
+	conn, err := amqp091.Dial("amqp://guest:guest@localhost:5672/")
+	if err != nil {
+		log.Fatalf("failed to connect to RabbitMQ: %v", err)
+	}
+	defer conn.Close()
+
+	producer, err := rabbitmq.NewProducer(conn)
+	if err != nil {
+		log.Fatalf("failed to create RabbitMQ producer: %v", err)
+	}
+
 	uc := usecase.NewOrderUseCase(repo, productClient, producer)
 
 	// Start TCP listener
@@ -65,7 +74,7 @@ func main() {
 	// Register reflection
 	reflection.Register(server)
 
-	log.Println("OrderService is running on port :5000...")
+	log.Println("OrderService is running on port :5000")
 	if err := server.Serve(listener); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
