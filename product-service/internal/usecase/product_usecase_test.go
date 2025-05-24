@@ -13,25 +13,20 @@ func TestProductUseCase_CreateProduct(t *testing.T) {
 	// Инициализируем мок репозитория
 	mockRepo := new(mocks.ProductRepository)
 
-	// Создаем экземпляр usecase с моком
 	uc := NewProductUseCase(mockRepo)
 
 	t.Run("successful product creation", func(t *testing.T) {
-		// Настраиваем ожидания для мока
 		mockRepo.On("Create", mock.AnythingOfType("*entity.Product")).
 			Return(nil).Once()
 
-		// Вызываем тестируемый метод
 		product, err := uc.CreateProduct("Test Product", 10.99, 100)
 
-		// Проверяем результаты
 		assert.NoError(t, err)
 		assert.NotNil(t, product)
 		assert.Equal(t, "Test Product", product.Name)
 		assert.Equal(t, 10.99, product.Price)
 		assert.Equal(t, 100, product.Stock)
 
-		// Проверяем, что мок был вызван как ожидалось
 		mockRepo.AssertExpectations(t)
 	})
 
