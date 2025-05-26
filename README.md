@@ -33,7 +33,7 @@ YouAre is a distributed system designed for managing a simple online store. It s
 
 1. Start RabbitMQ and Redis:
    ```bash
-   docker compose up -d
+   docker compose up -d;
 2. Start each service manually in separate terminals:
     cd user-service
     go run cmd/main.go
@@ -91,3 +91,30 @@ YouAre is a distributed system designed for managing a simple online store. It s
 | `GetOrder`     | `OrderRequest`          | `OrderResponse`         | Retrieves a specific order by ID.                     |
 | `GetAllOrders` | `google.protobuf.Empty` | `OrderListResponse`     | Returns a list of all orders.                         |
 | `DeleteOrder`  | `OrderRequest`          | `google.protobuf.Empty` | Deletes an order by ID.                               |
+
+## Implemented Features
+
+### User Service
+- User registration
+- User login and authentication (with JWT)
+- Fetch user profile
+- Admin: fetch all users
+- Delete user profile
+
+### Product Service
+- Create a new product
+- Get product by ID
+- List all products
+- Update product info
+- Decrease product stock
+- Delete a product
+
+### Order Service
+- Create an order
+- Get order by ID
+- List all orders
+- Delete order
+
+### Event-Driven Features
+- Asynchronous stock update via RabbitMQ after order creation
+- Consumer service that listens to order events and updates product stock
