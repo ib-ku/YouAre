@@ -33,7 +33,7 @@ YouAre is a distributed system designed for managing a simple online store. It s
 
 1. Start RabbitMQ and Redis:
    ```bash
-   docker compose up -d;
+   docker compose up -d
 2. Start each service manually in separate terminals:
     cd user-service
     go run cmd/main.go
