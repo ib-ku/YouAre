@@ -1,0 +1,17 @@
+version: '3'
+services:
+  test-mongo:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: test_products
+
+  product-service-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    depends_on:
+      - test-mongo
+    environment:
+      MONGO_URI: "mongodb://test-mongo:27017"

@@ -75,7 +75,7 @@ func main() {
 	// Enable reflection
 	reflection.Register(server)
 
-	log.Println("OrderService is running on port :5000...")
+	log.Println("OrderService is running on port :5000")
 	if err := server.Serve(listener); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
