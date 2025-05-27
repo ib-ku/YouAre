@@ -13,4 +13,7 @@ type Product struct {
 	Stock int                `json:"stock"`
 }
 
-var ErrInvalidCredentials = errors.New("invalid credentials")
+var (
+	ErrInvalidCredentials  = errors.New("invalid credentials")
+	ErrInternalServerError = errors.New("internal server error")
+)
